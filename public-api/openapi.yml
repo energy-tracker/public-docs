@@ -64,7 +64,7 @@ paths:
         - oauth2:
             - measuring-device
             - read:measuring-device
-      summary: Returns all standard measuring devices for the authenticated user
+      summary: Returns all standard measuring devices
       tags: &ref_0
         - Public API
   /v1/devices/virtual:
@@ -131,7 +131,7 @@ paths:
         - oauth2:
             - measuring-device
             - read:measuring-device
-      summary: Returns all virtual measuring devices for the authenticated user
+      summary: Returns all virtual measuring devices
       tags: *ref_0
   /v1/devices/{deviceId}/meter-readings:
     get:
@@ -186,7 +186,9 @@ paths:
             type: string
       responses:
         '200':
-          description: List of meter readings for the specified device
+          description: >-
+            List of meter readings for the specified device, ordered
+            chronologically
           content:
             application/json:
               schema:
@@ -207,7 +209,7 @@ paths:
             - read:measuring-device
             - meter-reading
             - read:meter-reading
-      summary: Returns all meter readings for the specified measuring device
+      summary: Returns meter readings for the specified device
       tags: &ref_1
         - Public API
     post:
@@ -235,7 +237,7 @@ paths:
               $ref: '#/components/schemas/CreateMeterReadingDto'
       responses:
         '204':
-          description: Meter reading successfully added
+          description: New meter reading successfully created for the specified device
         '400':
           description: Invalid input or data format
         '401':
@@ -254,7 +256,7 @@ paths:
             - write:measuring-device
             - meter-reading
             - write:meter-reading
-      summary: Adds a new meter reading for the specified measuring device
+      summary: Creates a new meter reading for the specified device
       tags: *ref_1
     delete:
       parameters:
@@ -290,7 +292,7 @@ paths:
             - delete:measuring-device
             - meter-reading
             - delete:meter-reading
-      summary: Deletes a meter reading for the specified measuring device and timestamp
+      summary: Deletes a meter reading for the specified device and timestamp
       tags: *ref_1
   /v1/devices/{deviceId}/meter-readings/export:
     post:
@@ -371,7 +373,7 @@ paths:
             - read:measuring-device
             - meter-reading
             - read:meter-reading
-      summary: Exports all meter readings for the specified measuring device as CSV
+      summary: Exports filtered meter readings for the specified device as CSV
       tags: *ref_1
 info:
   title: Energy Tracker Public API
