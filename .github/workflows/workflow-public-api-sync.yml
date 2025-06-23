@@ -1,0 +1,48 @@
+name: Sync Public API Documentation
+
+on:
+  repository_dispatch:
+    types: [trigger-sync-public-api-docs]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  sync-and-release:
+    name: Documentation Synchronization and Formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Energy Tracker Core Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'StefaniOSApps/energy-tracker-core'
+          fetch-depth: 1
+          path: 'energy-tracker-core'
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          ref: 'main'
+
+      - name: Checkout Public Docs Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'energy-tracker/public-docs'
+          fetch-depth: 1
+          path: 'public-docs'
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          ref: 'main'
+
+      - name: Copy Swagger
+        run: |
+          mkdir -p public-docs/public-api
+          cp energy-tracker-core/backend/docs/openapi-public.yml public-docs/public-api/openapi.yml
+
+      - name: Commit and Push Changes
+        run: |
+          cd public-docs
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add public-api/openapi.yml
+          git diff --cached --quiet || git commit -m "Update Public API documentation"
+          git push
