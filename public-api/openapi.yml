@@ -1,0 +1,534 @@
+openapi: 3.0.0
+paths:
+  /v1/devices/standard:
+    get:
+      parameters:
+        - name: name
+          required: false
+          in: query
+          description: Filters by (a partial) device name.
+          schema:
+            maxLength: 16
+            nullable: true
+            example: gas
+            type: string
+        - name: folderPath
+          required: false
+          in: query
+          description: Filters devices located in or under the specified folder path.
+          schema:
+            maxLength: 255
+            nullable: true
+            example: /Vacation
+            type: string
+        - name: updatedAfter
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or after this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: updatedBefore
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or before this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+      responses:
+        '200':
+          description: List of standard measuring devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceSummaryDto'
+        '400':
+          description: Invalid query parameters or input data
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+      summary: Returns all standard measuring devices for the authenticated user
+      tags: &ref_0
+        - Public API
+  /v1/devices/virtual:
+    get:
+      parameters:
+        - name: name
+          required: false
+          in: query
+          description: Filters by (a partial) device name.
+          schema:
+            maxLength: 16
+            nullable: true
+            example: gas
+            type: string
+        - name: folderPath
+          required: false
+          in: query
+          description: Filters devices located in or under the specified folder path.
+          schema:
+            maxLength: 255
+            nullable: true
+            example: /Vacation
+            type: string
+        - name: updatedAfter
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or after this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: updatedBefore
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or before this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+      responses:
+        '200':
+          description: List of virtual measuring devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceSummaryDto'
+        '400':
+          description: Invalid query parameters or input data
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+      summary: Returns all virtual measuring devices for the authenticated user
+      tags: *ref_0
+  /v1/devices/{deviceId}/meter-readings:
+    get:
+      parameters:
+        - name: meterId
+          required: false
+          in: query
+          description: Filter by meter ID
+          schema:
+            nullable: true
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: from
+          required: false
+          in: query
+          description: >-
+            Only include readings at or after this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: >-
+            Only include readings at or before this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: sort
+          required: false
+          in: query
+          description: Sort direction for results (ascending or descending by timestamp)
+          schema:
+            nullable: false
+            default: desc
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      responses:
+        '200':
+          description: List of meter readings for the specified device
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeterReadingDto'
+        '400':
+          description: Invalid query parameters or input data
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+            - meter-reading
+            - read:meter-reading
+      summary: Returns all meter readings for the specified measuring device
+      tags: &ref_1
+        - Public API
+    post:
+      parameters:
+        - name: allowRounding
+          required: false
+          in: query
+          description: Allow rounding of the provided value to match the meter’s precision.
+          schema:
+            nullable: true
+            example: 'true'
+            type: boolean
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeterReadingDto'
+      responses:
+        '204':
+          description: Meter reading successfully added
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: No valid meter available for the specified timestamp
+        '409':
+          description: A meter reading already exists for the given timestamp
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - write:measuring-device
+            - meter-reading
+            - write:meter-reading
+      summary: Adds a new meter reading for the specified measuring device
+      tags: *ref_1
+    delete:
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteMeterReadingDto'
+      responses:
+        '204':
+          description: Meter reading successfully deleted
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: No matching reading found for given timestamp
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - delete:measuring-device
+            - meter-reading
+            - delete:meter-reading
+      summary: Deletes a meter reading for the specified measuring device and timestamp
+      tags: *ref_1
+  /v1/devices/{deviceId}/meter-readings/export:
+    post:
+      parameters:
+        - name: meterId
+          required: false
+          in: query
+          description: Filter by meter ID
+          schema:
+            nullable: true
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: from
+          required: false
+          in: query
+          description: >-
+            Only include readings at or after this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: >-
+            Only include readings at or before this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: sort
+          required: false
+          in: query
+          description: Sort direction for results (ascending or descending by timestamp)
+          schema:
+            nullable: false
+            default: desc
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportMeterReadingsDto'
+      responses:
+        '200':
+          description: CSV file containing exported meter readings
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid input or query parameters
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+            - meter-reading
+            - read:meter-reading
+      summary: Exports all meter readings for the specified measuring device as CSV
+      tags: *ref_1
+info:
+  title: Energy Tracker Public API
+  description: >-
+    The Energy Tracker Public API allows authenticated third-party systems to
+    access and manage energy devices and meter readings. It supports reading,
+    writing, exporting, and filtering of energy data via secure endpoints.
+  version: '1.0'
+  contact: {}
+tags: []
+servers:
+  - url: public-api.energy-tracker.best-ios-apps.de
+    description: Public API Server
+components:
+  schemas:
+    DeviceSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the measuring device
+          example: deadbeef-dead-beef-dead-beefdeadbeef
+        name:
+          type: string
+          description: Human-readable name of the measuring device
+          example: Basement gas meter
+        folderPath:
+          type: string
+          description: Logical path for grouping the device into folders
+          example: /basement/gas
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the last update
+          example: '2020-01-01T00:00:00.000Z'
+          nullable: true
+      required:
+        - id
+        - name
+        - folderPath
+    MeterReadingDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00.000Z'
+          description: Date and time when the reading was recorded (ISO 8601, UTC).
+        value:
+          type: number
+          example: 123.45
+          description: Recorded meter reading value at the given timestamp.
+        rolloverOffset:
+          type: number
+          example: 100
+          description: >-
+            Rollover offset applied to the value (used after counter
+            wraparounds).
+        note:
+          type: string
+          example: Reading taken manually by user.
+          description: Optional note or comment about this reading.
+          nullable: true
+        meterId:
+          type: string
+          description: Unique identifier of the associated meter.
+          example: deadbeef-dead-beef-dead-beefdeadbeef
+        meterNumber:
+          type: string
+          example: ABC-123456
+          description: Optional external meter number of the associated meter.
+          nullable: true
+      required:
+        - timestamp
+        - value
+        - rolloverOffset
+        - meterId
+    CreateMeterReadingDto:
+      type: object
+      properties:
+        value:
+          type: number
+          description: Measured value to be recorded for the device.
+          example: 123.45
+          minimum: 0
+          maximum: 9999999999.99999
+        timestamp:
+          type: string
+          format: date-time
+          description: >-
+            Timestamp for the reading in ISO 8601 format (UTC). If omitted, the
+            current timestamp is used.
+          example: '2020-01-01T00:00:00.000Z'
+          nullable: true
+        note:
+          type: object
+          description: >-
+            Optional note or comment about the reading (e.g. device action,
+            source, etc.).
+          example: Washing machine connected
+          maxLength: 255
+          nullable: true
+      required:
+        - value
+    DeleteMeterReadingDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the reading to delete (in ISO 8601 format, UTC).
+          example: '2020-01-01T00:00:00.000Z'
+      required:
+        - timestamp
+    ExportMeterReadingsDto:
+      type: object
+      properties:
+        includeHeader:
+          type: boolean
+          description: Whether to include the header row in the CSV output.
+          default: true
+          nullable: false
+        delimiter:
+          type: string
+          description: Defines the delimiter used in the CSV output.
+          enum:
+            - comma
+            - semicolon
+            - tab
+          default: comma
+          nullable: false
+        dateFormat:
+          type: string
+          description: Defines how the date value should be formatted in the export.
+          enum:
+            - iso
+            - date_time
+            - unix
+            - unix_ms
+          default: iso
+          nullable: false
+        columns:
+          type: array
+          description: Defines the columns and their order in the exported CSV file.
+          uniqueItems: true
+          minItems: 1
+          example:
+            - date
+            - value
+            - note
+          items:
+            type: string
+            enum:
+              - date
+              - value
+              - note
+              - meter_id
+              - meter_number
+      required:
+        - columns
