@@ -1,139 +1,266 @@
 openapi: 3.0.0
 paths:
-  /v1/devices/standard:
+  /v1/devices/standard/{deviceId}/environments:
     get:
       parameters:
-        - name: name
-          required: false
-          in: query
-          description: Filters by (a partial) device name.
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
           schema:
-            maxLength: 16
-            nullable: true
-            example: gas
-            type: string
-        - name: folderPath
-          required: false
-          in: query
-          description: Filters devices located in or under the specified folder path.
-          schema:
-            maxLength: 255
-            nullable: true
-            example: /Vacation
-            type: string
-        - name: updatedAfter
-          required: false
-          in: query
-          description: >-
-            Includes only devices updated at or after this timestamp, following
-            the ISO 8601 format
-          schema:
-            format: date-time
-            nullable: true
-            example: '2020-01-01T00:00:00.000Z'
-            type: string
-        - name: updatedBefore
-          required: false
-          in: query
-          description: >-
-            Includes only devices updated at or before this timestamp, following
-            the ISO 8601 format
-          schema:
-            format: date-time
-            nullable: true
-            example: '2020-01-01T00:00:00.000Z'
+            example: deadbeef-dead-beef-dead-beefdeadbeef
             type: string
       responses:
         '200':
-          description: List of standard measuring devices
+          description: >-
+            List of environment records for the specified device, sorted
+            alphabetically by title
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DeviceSummaryDto'
+                  $ref: '#/components/schemas/EnvironmentRecordDto'
         '400':
           description: Invalid query parameters or input data
         '401':
           description: Invalid or missing access token
         '403':
           description: Insufficient scopes or user is blocked
+        '404':
+          description: >-
+            The specified device does not exist or is not accessible for this
+            user.
         '429':
           description: Too many requests – rate limit exceeded
       security:
         - oauth2:
             - measuring-device
             - read:measuring-device
-      summary: Returns all standard measuring devices
+            - environment-record
+            - read:environment-record
+      summary: Returns all environment records for the specified device
       tags: &ref_0
         - Public API
-  /v1/devices/virtual:
-    get:
+    post:
       parameters:
-        - name: name
-          required: false
-          in: query
-          description: Filters by (a partial) device name.
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
           schema:
-            maxLength: 16
-            nullable: true
-            example: gas
+            example: deadbeef-dead-beef-dead-beefdeadbeef
             type: string
-        - name: folderPath
-          required: false
-          in: query
-          description: Filters devices located in or under the specified folder path.
-          schema:
-            maxLength: 255
-            nullable: true
-            example: /Vacation
-            type: string
-        - name: updatedAfter
-          required: false
-          in: query
-          description: >-
-            Includes only devices updated at or after this timestamp, following
-            the ISO 8601 format
-          schema:
-            format: date-time
-            nullable: true
-            example: '2020-01-01T00:00:00.000Z'
-            type: string
-        - name: updatedBefore
-          required: false
-          in: query
-          description: >-
-            Includes only devices updated at or before this timestamp, following
-            the ISO 8601 format
-          schema:
-            format: date-time
-            nullable: true
-            example: '2020-01-01T00:00:00.000Z'
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRecordDto'
       responses:
-        '200':
-          description: List of virtual measuring devices
+        '201':
+          description: The newly created environment record
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DeviceSummaryDto'
+                $ref: '#/components/schemas/EnvironmentRecordDto'
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: >-
+            The specified device does not exist or is not accessible for this
+            user.
+        '409':
+          description: An environment record with the same name and unit already exists.
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - write:measuring-device
+            - environment-record
+            - write:environment-record
+      summary: Creates a new environment record for the specified device
+      tags: *ref_0
+  /v1/devices/standard/{deviceId}/environments/{environmentId}:
+    get:
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: environmentId
+          required: true
+          in: path
+          description: Unique identifier of the environment record
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      responses:
+        '200':
+          description: An environment record for the specified id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentRecordDto'
         '400':
           description: Invalid query parameters or input data
         '401':
           description: Invalid or missing access token
         '403':
           description: Insufficient scopes or user is blocked
+        '404':
+          description: >-
+            The requested resource does not exist or is not accessible for this
+            user.
         '429':
           description: Too many requests – rate limit exceeded
       security:
         - oauth2:
             - measuring-device
             - read:measuring-device
-      summary: Returns all virtual measuring devices
+            - environment-record
+            - read:environment-record
+      summary: Returns an specific environment record
       tags: *ref_0
-  /v1/devices/{deviceId}/meter-readings:
+    post:
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: environmentId
+          required: true
+          in: path
+          description: Unique identifier of the environment record
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentEntryDto'
+      responses:
+        '204':
+          description: Environment entry successfully created
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: >-
+            The specified device or environment record does not exist or is not
+            accessible for this user.
+        '409':
+          description: >-
+            An entry with the same timestamp already exists for this environment
+            record.
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - write:measuring-device
+            - environment-record
+            - write:environment-record
+      summary: Creates a new measurement entry for the specified environment record
+      tags: *ref_0
+    delete:
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: environmentId
+          required: true
+          in: path
+          description: Unique identifier of the environment record
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      responses:
+        '204':
+          description: Environment record successfully deleted
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: No matching environment record found for given id
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - delete:measuring-device
+            - environment-record
+            - delete:environment-record
+      summary: Deletes an environment record for the specified device and id
+      tags: *ref_0
+  /v1/devices/standard/{deviceId}/environments/{environmentId}/entries:
+    delete:
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: environmentId
+          required: true
+          in: path
+          description: Unique identifier of the environment record
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimestampDto'
+      responses:
+        '204':
+          description: Environment entry successfully deleted
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: No matching reading found for given timestamp
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - delete:measuring-device
+            - environment-record
+            - delete:environment-record
+      summary: Deletes an environment entry for the specified environment record
+      tags: *ref_0
+  /v1/devices/standard/{deviceId}/meter-readings:
     get:
       parameters:
         - name: meterId
@@ -272,7 +399,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteMeterReadingDto'
+              $ref: '#/components/schemas/TimestampDto'
       responses:
         '204':
           description: Meter reading successfully deleted
@@ -294,7 +421,7 @@ paths:
             - delete:meter-reading
       summary: Deletes a meter reading for the specified device and timestamp
       tags: *ref_1
-  /v1/devices/{deviceId}/meter-readings/export:
+  /v1/devices/standard/{deviceId}/meter-readings/export:
     post:
       parameters:
         - name: meterId
@@ -375,6 +502,385 @@ paths:
             - read:meter-reading
       summary: Exports filtered meter readings for the specified device as CSV
       tags: *ref_1
+  /v1/devices/{deviceId}/meter-readings:
+    get:
+      deprecated: true
+      parameters:
+        - name: meterId
+          required: false
+          in: query
+          description: Filter by meter ID
+          schema:
+            nullable: true
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: from
+          required: false
+          in: query
+          description: >-
+            Only include readings at or after this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: >-
+            Only include readings at or before this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: sort
+          required: false
+          in: query
+          description: Sort direction for results (ascending or descending by timestamp)
+          schema:
+            nullable: false
+            default: desc
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      responses:
+        '200':
+          description: >-
+            List of meter readings for the specified device, ordered
+            chronologically
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeterReadingDto'
+        '400':
+          description: Invalid query parameters or input data
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+            - meter-reading
+            - read:meter-reading
+      summary: Returns meter readings for the specified device
+      tags: &ref_2
+        - Public API
+    post:
+      deprecated: true
+      parameters:
+        - name: allowRounding
+          required: false
+          in: query
+          description: Allow rounding of the provided value to match the meter’s precision.
+          schema:
+            nullable: true
+            example: 'true'
+            type: boolean
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeterReadingDto'
+      responses:
+        '204':
+          description: New meter reading successfully created for the specified device
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: No valid meter available for the specified timestamp
+        '409':
+          description: A meter reading already exists for the given timestamp
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - write:measuring-device
+            - meter-reading
+            - write:meter-reading
+      summary: Creates a new meter reading for the specified device
+      tags: *ref_2
+    delete:
+      deprecated: true
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimestampDto'
+      responses:
+        '204':
+          description: Meter reading successfully deleted
+        '400':
+          description: Invalid input or data format
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: No matching reading found for given timestamp
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - delete:measuring-device
+            - meter-reading
+            - delete:meter-reading
+      summary: Deletes a meter reading for the specified device and timestamp
+      tags: *ref_2
+  /v1/devices/{deviceId}/meter-readings/export:
+    post:
+      deprecated: true
+      parameters:
+        - name: meterId
+          required: false
+          in: query
+          description: Filter by meter ID
+          schema:
+            nullable: true
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: from
+          required: false
+          in: query
+          description: >-
+            Only include readings at or after this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: >-
+            Only include readings at or before this timestamp, following the ISO
+            8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: sort
+          required: false
+          in: query
+          description: Sort direction for results (ascending or descending by timestamp)
+          schema:
+            nullable: false
+            default: desc
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportMeterReadingsDto'
+      responses:
+        '200':
+          description: CSV file containing exported meter readings
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid input or query parameters
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+            - meter-reading
+            - read:meter-reading
+      summary: Exports filtered meter readings for the specified device as CSV
+      tags: *ref_2
+  /v1/devices/standard:
+    get:
+      parameters:
+        - name: name
+          required: false
+          in: query
+          description: Filters by (a partial) device name.
+          schema:
+            maxLength: 16
+            nullable: true
+            example: gas
+            type: string
+        - name: folderPath
+          required: false
+          in: query
+          description: Filters devices located in or under the specified folder path.
+          schema:
+            maxLength: 255
+            nullable: true
+            example: /Vacation
+            type: string
+        - name: updatedAfter
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or after this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: updatedBefore
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or before this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+      responses:
+        '200':
+          description: List of standard measuring devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceSummaryDto'
+        '400':
+          description: Invalid query parameters or input data
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+      summary: Returns all standard measuring devices
+      tags: &ref_3
+        - Public API
+  /v1/devices/virtual:
+    get:
+      parameters:
+        - name: name
+          required: false
+          in: query
+          description: Filters by (a partial) device name.
+          schema:
+            maxLength: 16
+            nullable: true
+            example: gas
+            type: string
+        - name: folderPath
+          required: false
+          in: query
+          description: Filters devices located in or under the specified folder path.
+          schema:
+            maxLength: 255
+            nullable: true
+            example: /Vacation
+            type: string
+        - name: updatedAfter
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or after this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+        - name: updatedBefore
+          required: false
+          in: query
+          description: >-
+            Includes only devices updated at or before this timestamp, following
+            the ISO 8601 format
+          schema:
+            format: date-time
+            nullable: true
+            example: '2020-01-01T00:00:00.000Z'
+            type: string
+      responses:
+        '200':
+          description: List of virtual measuring devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceSummaryDto'
+        '400':
+          description: Invalid query parameters or input data
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '429':
+          description: Too many requests – rate limit exceeded
+      security:
+        - oauth2:
+            - measuring-device
+            - read:measuring-device
+      summary: Returns all virtual measuring devices
+      tags: *ref_3
 info:
   title: Energy Tracker Public API
   description: >-
@@ -389,31 +895,106 @@ servers:
     description: Public API Server
 components:
   schemas:
-    DeviceSummaryDto:
+    EnvironmentEntryDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: >-
+            Date and time when the environmental data entry was recorded (ISO
+            8601, UTC).
+          example: '2020-01-01T00:00:00.000Z'
+        value:
+          type: number
+          description: Value of the environmental record entry
+          example: 23.5
+          minimum: -9999999999.99999
+          maximum: 9999999999.99999
+      required:
+        - timestamp
+        - value
+    EnvironmentRecordDto:
       type: object
       properties:
         id:
           type: string
-          description: Unique identifier of the measuring device
+          description: Unique identifier of the associated meter.
           example: deadbeef-dead-beef-dead-beefdeadbeef
-        name:
+        title:
           type: string
-          description: Human-readable name of the measuring device
-          example: Basement gas meter
-        folderPath:
+          description: The title of the environment record (e.g., Temperature)
+          example: Temperature
+          minLength: 1
+          maxLength: 50
+        unit:
           type: string
-          description: Logical path for grouping the device into folders
-          example: /basement/gas
-        lastUpdatedAt:
+          description: The unit of the environment record (e.g., °C)
+          example: °C
+          minLength: 1
+          maxLength: 10
+          nullable: true
+        entries:
+          description: List of entries associated with the environmental record
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentEntryDto'
+      required:
+        - id
+        - title
+        - entries
+    CreateEnvironmentRecordDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: >-
+            Title of the environment record (e.g., Temperature, Humidity,
+            Pressure).
+          example: Temperature
+          minLength: 1
+          maxLength: 50
+        unit:
+          type: string
+          description: >-
+            Unit of measurement for the environment data (e.g., °C, %, hPa). If
+            omitted, the record will have no unit assigned.
+          example: °C
+          minLength: 1
+          maxLength: 10
+          nullable: true
+      required:
+        - title
+    CreateEnvironmentEntryDto:
+      type: object
+      properties:
+        value:
+          type: number
+          description: Numeric value of the environment measurement entry.
+          example: 23.5
+          minimum: -9999999999.99999
+          maximum: 9999999999.99999
+        timestamp:
           type: string
           format: date-time
-          description: ISO 8601 timestamp of the last update
+          description: >-
+            Timestamp in ISO 8601 format (UTC) indicating when the environment
+            data was recorded. If not provided, the current server time will be
+            used
           example: '2020-01-01T00:00:00.000Z'
           nullable: true
       required:
-        - id
-        - name
-        - folderPath
+        - value
+    TimestampDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the entry to delete (in ISO 8601 format, UTC).
+          example: '2020-01-01T00:00:00.000Z'
+      required:
+        - timestamp
     MeterReadingDto:
       type: object
       properties:
@@ -478,16 +1059,6 @@ components:
           nullable: true
       required:
         - value
-    DeleteMeterReadingDto:
-      type: object
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp of the reading to delete (in ISO 8601 format, UTC).
-          example: '2020-01-01T00:00:00.000Z'
-      required:
-        - timestamp
     ExportMeterReadingsDto:
       type: object
       properties:
@@ -534,3 +1105,28 @@ components:
               - meter_number
       required:
         - columns
+    DeviceSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the measuring device
+          example: deadbeef-dead-beef-dead-beefdeadbeef
+        name:
+          type: string
+          description: Human-readable name of the measuring device
+          example: Basement gas meter
+        folderPath:
+          type: string
+          description: Logical path for grouping the device into folders
+          example: /basement/gas
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the last update
+          example: '2020-01-01T00:00:00.000Z'
+          nullable: true
+      required:
+        - id
+        - name
+        - folderPath
