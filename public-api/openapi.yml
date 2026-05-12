@@ -299,12 +299,7 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            nullable: false
-            default: desc
-            type: string
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -463,12 +458,7 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            nullable: false
-            default: desc
-            type: string
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -544,12 +534,7 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            nullable: false
-            default: desc
-            type: string
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -705,12 +690,7 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            nullable: false
-            default: desc
-            type: string
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -787,12 +767,7 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            nullable: false
-            default: desc
-            type: string
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -951,12 +926,7 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            nullable: false
-            default: desc
-            type: string
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -1241,6 +1211,11 @@ components:
           example: '2020-01-01T00:00:00.000Z'
       required:
         - timestamp
+    SortDirection:
+      type: string
+      enum:
+        - asc
+        - desc
     MeterReadingDto:
       type: object
       properties:
@@ -1305,6 +1280,30 @@ components:
           nullable: true
       required:
         - value
+    MeterReadingCsvDelimiter:
+      type: string
+      enum:
+        - comma
+        - semicolon
+        - tab
+      description: Defines the delimiter used in the CSV output.
+    MeterReadingCsvDateFormat:
+      type: string
+      enum:
+        - iso
+        - date_time
+        - unix
+        - unix_ms
+      description: Defines how the date value should be formatted in the export.
+    MeterReadingCsvColumn:
+      type: string
+      enum:
+        - date
+        - value
+        - note
+        - meter_id
+        - meter_number
+      description: Defines the columns and their order in the exported CSV file.
     ExportMeterReadingsDto:
       type: object
       properties:
@@ -1314,24 +1313,17 @@ components:
           default: true
           nullable: false
         delimiter:
-          type: string
           description: Defines the delimiter used in the CSV output.
-          enum:
-            - comma
-            - semicolon
-            - tab
           default: comma
           nullable: false
+          allOf:
+            - $ref: '#/components/schemas/MeterReadingCsvDelimiter'
         dateFormat:
-          type: string
           description: Defines how the date value should be formatted in the export.
-          enum:
-            - iso
-            - date_time
-            - unix
-            - unix_ms
           default: iso
           nullable: false
+          allOf:
+            - $ref: '#/components/schemas/MeterReadingCsvDateFormat'
         columns:
           type: array
           description: Defines the columns and their order in the exported CSV file.
@@ -1342,13 +1334,7 @@ components:
             - value
             - note
           items:
-            type: string
-            enum:
-              - date
-              - value
-              - note
-              - meter_id
-              - meter_number
+            $ref: '#/components/schemas/MeterReadingCsvColumn'
       required:
         - columns
     MeterReadingV3Dto:
