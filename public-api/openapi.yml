@@ -34,14 +34,16 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - environment-record
-            - read:environment-record
+        - bearer: []
       summary: Returns all environment records for the specified device
       tags: &ref_0
         - Public API
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - environment-record
+          - read:environment-record
     post:
       parameters:
         - name: deviceId
@@ -79,13 +81,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - write:measuring-device
-            - environment-record
-            - write:environment-record
+        - bearer: []
       summary: Creates a new environment record for the specified device
       tags: *ref_0
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - write:measuring-device
+          - environment-record
+          - write:environment-record
   /v1/devices/standard/{deviceId}/environments/{environmentId}:
     get:
       parameters:
@@ -123,13 +127,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - environment-record
-            - read:environment-record
+        - bearer: []
       summary: Returns an specific environment record
       tags: *ref_0
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - environment-record
+          - read:environment-record
     post:
       parameters:
         - name: deviceId
@@ -172,13 +178,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - write:measuring-device
-            - environment-record
-            - write:environment-record
+        - bearer: []
       summary: Creates a new measurement entry for the specified environment record
       tags: *ref_0
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - write:measuring-device
+          - environment-record
+          - write:environment-record
     delete:
       parameters:
         - name: deviceId
@@ -209,13 +217,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - delete:measuring-device
-            - environment-record
-            - delete:environment-record
+        - bearer: []
       summary: Deletes an environment record for the specified device and id
       tags: *ref_0
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - delete:measuring-device
+          - environment-record
+          - delete:environment-record
   /v1/devices/standard/{deviceId}/environments/{environmentId}/entries:
     delete:
       parameters:
@@ -253,13 +263,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - delete:measuring-device
-            - environment-record
-            - delete:environment-record
+        - bearer: []
       summary: Deletes an environment entry for the specified environment record
       tags: *ref_0
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - delete:measuring-device
+          - environment-record
+          - delete:environment-record
   /v1/devices/standard/{deviceId}/meter-readings:
     get:
       deprecated: true
@@ -327,14 +339,16 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - meter-reading
-            - read:meter-reading
+        - bearer: []
       summary: Returns meter readings for the specified device
       tags: &ref_1
         - Public API
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - meter-reading
+          - read:meter-reading
     post:
       deprecated: true
       parameters:
@@ -371,17 +385,21 @@ paths:
         '404':
           description: No valid meter available for the specified timestamp
         '409':
-          description: A meter reading already exists for the given timestamp
+          description: >-
+            A reading already exists or overlapping meters make the target
+            ambiguous
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - write:measuring-device
-            - meter-reading
-            - write:meter-reading
+        - bearer: []
       summary: Creates a new meter reading for the specified device
       tags: *ref_1
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - write:measuring-device
+          - meter-reading
+          - write:meter-reading
     delete:
       deprecated: true
       parameters:
@@ -409,16 +427,22 @@ paths:
           description: Insufficient scopes or user is blocked
         '404':
           description: No matching reading found for given timestamp
+        '409':
+          description: >-
+            Multiple meters have readings at this timestamp; select the meter in
+            the app
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - delete:measuring-device
-            - meter-reading
-            - delete:meter-reading
+        - bearer: []
       summary: Deletes a meter reading for the specified device and timestamp
       tags: *ref_1
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - delete:measuring-device
+          - meter-reading
+          - delete:meter-reading
   /v1/devices/standard/{deviceId}/meter-readings/export:
     post:
       deprecated: true
@@ -489,13 +513,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - meter-reading
-            - read:meter-reading
+        - bearer: []
       summary: Exports filtered meter readings for the specified device as CSV
       tags: *ref_1
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - meter-reading
+          - read:meter-reading
   /v3/devices/standard/{deviceId}/meter-readings:
     get:
       parameters:
@@ -562,14 +588,16 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - meter-reading
-            - read:meter-reading
+        - bearer: []
       summary: Returns meter readings for the specified device
       tags: &ref_2
         - Public API
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - meter-reading
+          - read:meter-reading
     post:
       parameters:
         - name: allowRounding
@@ -605,17 +633,21 @@ paths:
         '404':
           description: No valid meter available for the specified timestamp
         '409':
-          description: A meter reading already exists for the given timestamp
+          description: >-
+            A reading already exists or overlapping meters make the target
+            ambiguous
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - write:measuring-device
-            - meter-reading
-            - write:meter-reading
+        - bearer: []
       summary: Creates a new meter reading for the specified device
       tags: *ref_2
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - write:measuring-device
+          - meter-reading
+          - write:meter-reading
     delete:
       parameters:
         - name: deviceId
@@ -642,16 +674,22 @@ paths:
           description: Insufficient scopes or user is blocked
         '404':
           description: No matching reading found for given timestamp
+        '409':
+          description: >-
+            Multiple meters have readings at this timestamp; select the meter in
+            the app
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - delete:measuring-device
-            - meter-reading
-            - delete:meter-reading
+        - bearer: []
       summary: Deletes a meter reading for the specified device and timestamp
       tags: *ref_2
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - delete:measuring-device
+          - meter-reading
+          - delete:meter-reading
   /v3/devices/standard/{deviceId}/meter-readings/export:
     post:
       parameters:
@@ -721,13 +759,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - meter-reading
-            - read:meter-reading
+        - bearer: []
       summary: Exports filtered meter readings for the specified device as CSV
       tags: *ref_2
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - meter-reading
+          - read:meter-reading
   /v1/devices/{deviceId}/meter-readings:
     get:
       deprecated: true
@@ -795,14 +835,16 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - meter-reading
-            - read:meter-reading
+        - bearer: []
       summary: Returns meter readings for the specified device
       tags: &ref_3
         - Public API
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - meter-reading
+          - read:meter-reading
     post:
       deprecated: true
       parameters:
@@ -839,17 +881,21 @@ paths:
         '404':
           description: No valid meter available for the specified timestamp
         '409':
-          description: A meter reading already exists for the given timestamp
+          description: >-
+            A reading already exists or overlapping meters make the target
+            ambiguous
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - write:measuring-device
-            - meter-reading
-            - write:meter-reading
+        - bearer: []
       summary: Creates a new meter reading for the specified device
       tags: *ref_3
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - write:measuring-device
+          - meter-reading
+          - write:meter-reading
     delete:
       deprecated: true
       parameters:
@@ -877,16 +923,22 @@ paths:
           description: Insufficient scopes or user is blocked
         '404':
           description: No matching reading found for given timestamp
+        '409':
+          description: >-
+            Multiple meters have readings at this timestamp; select the meter in
+            the app
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - delete:measuring-device
-            - meter-reading
-            - delete:meter-reading
+        - bearer: []
       summary: Deletes a meter reading for the specified device and timestamp
       tags: *ref_3
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - delete:measuring-device
+          - meter-reading
+          - delete:meter-reading
   /v1/devices/{deviceId}/meter-readings/export:
     post:
       deprecated: true
@@ -957,13 +1009,15 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
-            - meter-reading
-            - read:meter-reading
+        - bearer: []
       summary: Exports filtered meter readings for the specified device as CSV
       tags: *ref_3
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
+          - meter-reading
+          - read:meter-reading
   /v1/devices/standard:
     get:
       parameters:
@@ -1025,12 +1079,14 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
+        - bearer: []
       summary: Returns all standard measuring devices
       tags: &ref_4
         - Public API
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
   /v1/devices/virtual:
     get:
       parameters:
@@ -1092,11 +1148,13 @@ paths:
         '429':
           description: Too many requests – rate limit exceeded
       security:
-        - oauth2:
-            - measuring-device
-            - read:measuring-device
+        - bearer: []
       summary: Returns all virtual measuring devices
       tags: *ref_4
+      x-required-scopes:
+        anyOf:
+          - measuring-device
+          - read:measuring-device
 info:
   title: Energy Tracker Public API
   description: >-
@@ -1110,6 +1168,15 @@ servers:
   - url: public-api.energy-tracker.best-ios-apps.de
     description: Public API Server
 components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+      description: >-
+        A personal access token, sent as `Authorization: Bearer <token>`. Which
+        scopes an operation accepts is listed under its `x-required-scopes`; any
+        one of them is enough.
   schemas:
     EnvironmentEntryDto:
       type: object
@@ -1271,7 +1338,7 @@ components:
           example: '2020-01-01T00:00:00.000Z'
           nullable: true
         note:
-          type: object
+          type: string
           description: >-
             Optional note or comment about the reading (e.g. device action,
             source, etc.).
@@ -1390,7 +1457,7 @@ components:
           example: '2020-01-01T00:00:00.000Z'
           nullable: true
         note:
-          type: object
+          type: string
           description: >-
             Optional note or comment about the reading (e.g. device action,
             source, etc.).
