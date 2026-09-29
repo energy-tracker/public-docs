@@ -1155,6 +1155,203 @@ paths:
         anyOf:
           - measuring-device
           - read:measuring-device
+  /v1/devices/standard/{deviceId}/daily-values:
+    get:
+      description: >-
+        Returns chronologically ordered, reading-backed daily points. Values
+        represent consumption or production depending on the device.
+        Insufficient readings return an empty list. Physical meter histories are
+        prepared as one continuous cumulative series, matching Web, and
+        interpolated once within one worker job. Interpolation also spans
+        replacement gaps; terminal points with zero duration are retained.
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: from
+          required: false
+          in: query
+          description: >-
+            Inclusive output start as an ISO 8601 timestamp with an explicit
+            offset, between years 1000 and 9999. Rounded down in the selected
+            time zone to the day start for daily values or the selected interval
+            start for extrapolation. No lower date filter is applied to daily
+            values when omitted. Defaults to the current interval start for
+            extrapolation.
+          schema:
+            format: date-time
+            nullable: true
+            example: '2026-09-01T00:00:00+02:00'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: >-
+            Exclusive output end as an ISO 8601 timestamp with an explicit
+            offset, between years 1000 and 9999. Must follow from before
+            normalization. Rounded up in the selected time zone to the next day
+            or interval boundary; exact boundaries remain unchanged. No upper
+            date filter is applied to daily values when omitted. Defaults to the
+            next interval start for extrapolation. An explicit daily end cannot
+            extend beyond tomorrow. The normalized extrapolation range allows at
+            most 366 calendar days and can include the interval containing
+            twelve months after the latest reading.
+          schema:
+            format: date-time
+            nullable: true
+            example: '2026-10-01T00:00:00+02:00'
+            type: string
+        - name: timeZone
+          required: false
+          in: query
+          description: >-
+            Optional IANA time zone override. Defaults to the device location
+            time zone, or UTC if no location exists.
+          schema:
+            maxLength: 100
+            nullable: true
+            example: Europe/Berlin
+            type: string
+      responses:
+        '200':
+          description: Daily values in the device unit
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalculationPointDto'
+        '400':
+          description: Invalid parameters or calculation limits exceeded
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: Device does not exist or is not owned by the user
+        '409':
+          description: Ambiguous or unrepresentable meter readings prevent calculation
+        '429':
+          description: Too many requests – rate limit exceeded
+        '503':
+          description: Calculation unavailable or request deadline exceeded
+      security:
+        - bearer: []
+      summary: Returns daily values for a standard measuring device
+      tags: &ref_5
+        - Public API
+      x-required-scopes:
+        anyOf:
+          - read:daily-values
+  /v1/devices/standard/{deviceId}/extrapolations/{method}/{interval}:
+    get:
+      description: >-
+        Values represent consumption or production depending on the device.
+        Standard extrapolation uses reading-backed daily values and history from
+        the three preceding calendar years. Results are estimates, ordered
+        chronologically. Output is limited to 366 calendar days and calculation
+        input to 2000 readings including boundary readings. Insufficient
+        readings return an empty list.
+      parameters:
+        - name: deviceId
+          required: true
+          in: path
+          description: Unique identifier of the measuring device
+          schema:
+            example: deadbeef-dead-beef-dead-beefdeadbeef
+            type: string
+        - name: method
+          required: true
+          in: path
+          description: >-
+            Calculation method. Standard combines interval extrapolation with
+            history-based forecasting.
+          schema:
+            $ref: '#/components/schemas/ExtrapolationMethod'
+        - name: interval
+          required: true
+          in: path
+          description: Calendar interval for the extrapolation. Weeks begin on Monday.
+          schema:
+            $ref: '#/components/schemas/CalculationInterval'
+        - name: from
+          required: false
+          in: query
+          description: >-
+            Inclusive output start as an ISO 8601 timestamp with an explicit
+            offset, between years 1000 and 9999. Rounded down in the selected
+            time zone to the day start for daily values or the selected interval
+            start for extrapolation. No lower date filter is applied to daily
+            values when omitted. Defaults to the current interval start for
+            extrapolation.
+          schema:
+            format: date-time
+            nullable: true
+            example: '2026-09-01T00:00:00+02:00'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: >-
+            Exclusive output end as an ISO 8601 timestamp with an explicit
+            offset, between years 1000 and 9999. Must follow from before
+            normalization. Rounded up in the selected time zone to the next day
+            or interval boundary; exact boundaries remain unchanged. No upper
+            date filter is applied to daily values when omitted. Defaults to the
+            next interval start for extrapolation. An explicit daily end cannot
+            extend beyond tomorrow. The normalized extrapolation range allows at
+            most 366 calendar days and can include the interval containing
+            twelve months after the latest reading.
+          schema:
+            format: date-time
+            nullable: true
+            example: '2026-10-01T00:00:00+02:00'
+            type: string
+        - name: timeZone
+          required: false
+          in: query
+          description: >-
+            Optional IANA time zone override. Defaults to the device location
+            time zone, or UTC if no location exists.
+          schema:
+            maxLength: 100
+            nullable: true
+            example: Europe/Berlin
+            type: string
+      responses:
+        '200':
+          description: Extrapolations in the device unit
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalculationPointDto'
+        '400':
+          description: Invalid parameters or calculation limits exceeded
+        '401':
+          description: Invalid or missing access token
+        '403':
+          description: Insufficient scopes or user is blocked
+        '404':
+          description: Device does not exist or is not owned by the user
+        '409':
+          description: Ambiguous or unrepresentable meter readings prevent calculation
+        '429':
+          description: Too many requests – rate limit exceeded
+        '503':
+          description: Calculation unavailable or request deadline exceeded
+      security:
+        - bearer: []
+      summary: Returns extrapolations for a standard measuring device
+      tags: *ref_5
+      x-required-scopes:
+        anyOf:
+          - read:extrapolation
 info:
   title: Energy Tracker Public API
   description: >-
@@ -1491,3 +1688,56 @@ components:
         - id
         - name
         - folderPath
+    CalculationPointDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          description: Start of the calendar interval, serialized in UTC.
+          example: '2026-09-01T22:00:00.000Z'
+        actualValue:
+          type: number
+          description: >-
+            Value derived from recorded readings by interpolation, in the device
+            unit. Represents consumption or production depending on the device.
+          example: 4.2
+        actualDuration:
+          type: number
+          description: >-
+            Duration covered by readings, in seconds. May differ from nominal
+            duration on daylight-saving transitions.
+          minimum: 0
+          example: 43200
+        expectedValue:
+          type: number
+          description: >-
+            Estimated total value for the full interval, in the device unit.
+            Represents consumption or production depending on the device. Do not
+            add actualValue.
+          example: 8.4
+        expectedDuration:
+          type: number
+          description: >-
+            Nominal duration of the full interval in seconds, based on 24 hours
+            per calendar day.
+          minimum: 0
+          example: 86400
+      required:
+        - date
+        - actualValue
+        - actualDuration
+        - expectedValue
+        - expectedDuration
+    ExtrapolationMethod:
+      type: string
+      enum:
+        - standard
+    CalculationInterval:
+      type: string
+      enum:
+        - day
+        - week
+        - month
+        - quarter
+        - year
