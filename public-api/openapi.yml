@@ -1176,12 +1176,12 @@ paths:
           required: false
           in: query
           description: >-
-            Inclusive output start as an ISO 8601 timestamp with an explicit
-            offset, between years 1000 and 9999. Rounded down in the selected
-            time zone to the day start for daily values or the selected interval
-            start for extrapolation. No lower date filter is applied to daily
-            values when omitted. Defaults to the current interval start for
-            extrapolation.
+            Inclusive daily-value start as an ISO 8601 timestamp with an
+            explicit offset, between years 1000 and 9999. Fractional seconds are
+            accepted; precision beyond milliseconds is discarded. Rounded down
+            to the day start in the selected time zone. Extrapolation uses the
+            filtered daily values. No lower date filter is applied when omitted;
+            all available history is included.
           schema:
             format: date-time
             nullable: true
@@ -1191,15 +1191,15 @@ paths:
           required: false
           in: query
           description: >-
-            Exclusive output end as an ISO 8601 timestamp with an explicit
-            offset, between years 1000 and 9999. Must follow from before
-            normalization. Rounded up in the selected time zone to the next day
-            or interval boundary; exact boundaries remain unchanged. No upper
-            date filter is applied to daily values when omitted. Defaults to the
-            next interval start for extrapolation. An explicit daily end cannot
-            extend beyond tomorrow. The normalized extrapolation range allows at
-            most 366 calendar days and can include the interval containing
-            twelve months after the latest reading.
+            Exclusive daily-value end as an ISO 8601 timestamp with an explicit
+            offset, between years 1000 and 9999. Fractional seconds are
+            accepted; precision beyond milliseconds is discarded. Must follow
+            from before normalization. Rounded up to the next day boundary in
+            the selected time zone; exact boundaries remain unchanged. No upper
+            date filter is applied when omitted. Daily filters never extend the
+            recorded coverage. Extrapolation uses the filtered daily values
+            without adding a forecast horizon. The calculated span is limited to
+            36,600 days; older devices can be queried in smaller ranges.
           schema:
             format: date-time
             nullable: true
@@ -1251,11 +1251,11 @@ paths:
     get:
       description: >-
         Values represent consumption or production depending on the device.
-        Standard extrapolation uses reading-backed daily values and history from
-        the three preceding calendar years. Results are estimates, ordered
-        chronologically. Output is limited to 366 calendar days and calculation
-        input to 2000 readings including boundary readings. Insufficient
-        readings return an empty list.
+        Standard extrapolation uses reading-backed daily values, optionally
+        filtered by from and to before extrapolation. Without filters, it uses
+        the complete available daily-value history. Results are estimates,
+        ordered chronologically. The calculation period is limited to 100 years.
+        Insufficient readings return an empty list.
       parameters:
         - name: deviceId
           required: true
@@ -1282,12 +1282,12 @@ paths:
           required: false
           in: query
           description: >-
-            Inclusive output start as an ISO 8601 timestamp with an explicit
-            offset, between years 1000 and 9999. Rounded down in the selected
-            time zone to the day start for daily values or the selected interval
-            start for extrapolation. No lower date filter is applied to daily
-            values when omitted. Defaults to the current interval start for
-            extrapolation.
+            Inclusive daily-value start as an ISO 8601 timestamp with an
+            explicit offset, between years 1000 and 9999. Fractional seconds are
+            accepted; precision beyond milliseconds is discarded. Rounded down
+            to the day start in the selected time zone. Extrapolation uses the
+            filtered daily values. No lower date filter is applied when omitted;
+            all available history is included.
           schema:
             format: date-time
             nullable: true
@@ -1297,15 +1297,15 @@ paths:
           required: false
           in: query
           description: >-
-            Exclusive output end as an ISO 8601 timestamp with an explicit
-            offset, between years 1000 and 9999. Must follow from before
-            normalization. Rounded up in the selected time zone to the next day
-            or interval boundary; exact boundaries remain unchanged. No upper
-            date filter is applied to daily values when omitted. Defaults to the
-            next interval start for extrapolation. An explicit daily end cannot
-            extend beyond tomorrow. The normalized extrapolation range allows at
-            most 366 calendar days and can include the interval containing
-            twelve months after the latest reading.
+            Exclusive daily-value end as an ISO 8601 timestamp with an explicit
+            offset, between years 1000 and 9999. Fractional seconds are
+            accepted; precision beyond milliseconds is discarded. Must follow
+            from before normalization. Rounded up to the next day boundary in
+            the selected time zone; exact boundaries remain unchanged. No upper
+            date filter is applied when omitted. Daily filters never extend the
+            recorded coverage. Extrapolation uses the filtered daily values
+            without adding a forecast horizon. The calculated span is limited to
+            36,600 days; older devices can be queried in smaller ranges.
           schema:
             format: date-time
             nullable: true
@@ -1578,7 +1578,7 @@ components:
           nullable: false
         delimiter:
           description: Defines the delimiter used in the CSV output.
-          default: comma
+          default: semicolon
           nullable: false
           allOf:
             - $ref: '#/components/schemas/MeterReadingCsvDelimiter'
