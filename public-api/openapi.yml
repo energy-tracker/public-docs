@@ -1,5 +1,37 @@
 openapi: 3.0.0
 paths:
+  /v1/token/status:
+    get:
+      description: >-
+        Returns the token name, granted scopes and expiry. No additional scope
+        is required, including for write-only tokens. Does not update lastUsedAt
+        or create readings. Limited to 5 requests per 5 minutes per IP address
+        and API instance, including missing or invalid token attempts. Do not
+        poll this endpoint; use it when configuring an integration or checking
+        credentials.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenStatusDto'
+        '401':
+          description: Missing, invalid, expired or revoked token
+        '403':
+          description: The account is suspended
+        '429':
+          description: Rate limit exceeded. Retry-After specifies the wait in seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      security:
+        - bearer: []
+      summary: Validate the supplied personal access token
+      tags:
+        - Public API
   /v1/devices/standard/{deviceId}/environments:
     get:
       parameters:
@@ -1375,6 +1407,45 @@ components:
         scopes an operation accepts is listed under its `x-required-scopes`; any
         one of them is enough.
   schemas:
+    PersonalAccessTokenScope:
+      type: string
+      enum:
+        - read:daily-values
+        - read:extrapolation
+        - meter-reading
+        - read:meter-reading
+        - write:meter-reading
+        - delete:meter-reading
+        - measuring-device
+        - read:measuring-device
+        - write:measuring-device
+        - delete:measuring-device
+        - environment-record
+        - read:environment-record
+        - write:environment-record
+        - delete:environment-record
+      description: List of access scopes granted to this token
+    TokenStatusDto:
+      type: object
+      properties:
+        displayName:
+          type: string
+          maxLength: 32
+          description: User-assigned token name
+        scopes:
+          type: array
+          description: List of access scopes granted to this token
+          items:
+            $ref: '#/components/schemas/PersonalAccessTokenScope'
+        expiresAt:
+          format: date-time
+          type: string
+          nullable: true
+          description: Token expiry in UTC; null means no expiry
+      required:
+        - displayName
+        - scopes
+        - expiresAt
     EnvironmentEntryDto:
       type: object
       properties:
