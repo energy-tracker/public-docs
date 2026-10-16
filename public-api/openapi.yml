@@ -1208,12 +1208,13 @@ paths:
           required: false
           in: query
           description: >-
-            Inclusive daily-value start as an ISO 8601 timestamp with an
-            explicit offset, between years 1000 and 9999. Fractional seconds are
-            accepted; precision beyond milliseconds is discarded. Rounded down
-            to the day start in the selected time zone. Extrapolation uses the
-            filtered daily values. No lower date filter is applied when omitted;
-            all available history is included.
+            Inclusive start of the returned period as an ISO 8601 timestamp with
+            an explicit offset, between years 1000 and 9999. Fractional seconds
+            are accepted; precision beyond milliseconds is discarded. Rounded
+            down to the day start in the selected time zone. Daily values before
+            it are not returned. Extrapolation always forecasts from the
+            complete history and returns the intervals from this day on. No
+            lower limit is applied when omitted.
           schema:
             format: date-time
             nullable: true
@@ -1223,15 +1224,19 @@ paths:
           required: false
           in: query
           description: >-
-            Exclusive daily-value end as an ISO 8601 timestamp with an explicit
-            offset, between years 1000 and 9999. Fractional seconds are
-            accepted; precision beyond milliseconds is discarded. Must follow
-            from before normalization. Rounded up to the next day boundary in
-            the selected time zone; exact boundaries remain unchanged. No upper
-            date filter is applied when omitted. Daily filters never extend the
-            recorded coverage. Extrapolation uses the filtered daily values
-            without adding a forecast horizon. The calculated span is limited to
-            36,600 days; older devices can be queried in smaller ranges.
+            Exclusive end of the returned period as an ISO 8601 timestamp with
+            an explicit offset, between years 1000 and 9999. Fractional seconds
+            are accepted; precision beyond milliseconds is discarded. Must
+            follow from before normalization. Rounded up to the next day
+            boundary in the selected time zone; exact boundaries remain
+            unchanged. Daily values never extend the recorded coverage; without
+            an end they run to the last reading. Extrapolation forecasts daily
+            values through the day before this end, also beyond the last
+            reading; without an end it stops at the day of the last reading. The
+            calculated span is limited to 36,600 days: for daily values the
+            readings the range needs, for extrapolation the complete history
+            through this end. Daily values of older devices can therefore be
+            queried in smaller ranges, extrapolations cannot.
           schema:
             format: date-time
             nullable: true
@@ -1283,11 +1288,15 @@ paths:
     get:
       description: >-
         Values represent consumption or production depending on the device.
-        Standard extrapolation uses reading-backed daily values, optionally
-        filtered by from and to before extrapolation. Without filters, it uses
-        the complete available daily-value history. Results are estimates,
-        ordered chronologically. The calculation period is limited to 100 years.
-        Insufficient readings return an empty list.
+        Standard extrapolation follows the consumption chart of the Web app: the
+        complete reading-backed daily values are forecast through the requested
+        end, the result is limited to from and to, and weeks, months, quarters
+        and years are built from that period and forecast to the end of the
+        interval its last day lies in. The first and the last interval can
+        therefore reach beyond from and to. Results are estimates, ordered
+        chronologically. The complete history through the requested end is
+        limited to 100 years. Insufficient readings and an end that does not lie
+        after the first daily value return an empty list.
       parameters:
         - name: deviceId
           required: true
@@ -1314,12 +1323,13 @@ paths:
           required: false
           in: query
           description: >-
-            Inclusive daily-value start as an ISO 8601 timestamp with an
-            explicit offset, between years 1000 and 9999. Fractional seconds are
-            accepted; precision beyond milliseconds is discarded. Rounded down
-            to the day start in the selected time zone. Extrapolation uses the
-            filtered daily values. No lower date filter is applied when omitted;
-            all available history is included.
+            Inclusive start of the returned period as an ISO 8601 timestamp with
+            an explicit offset, between years 1000 and 9999. Fractional seconds
+            are accepted; precision beyond milliseconds is discarded. Rounded
+            down to the day start in the selected time zone. Daily values before
+            it are not returned. Extrapolation always forecasts from the
+            complete history and returns the intervals from this day on. No
+            lower limit is applied when omitted.
           schema:
             format: date-time
             nullable: true
@@ -1329,15 +1339,19 @@ paths:
           required: false
           in: query
           description: >-
-            Exclusive daily-value end as an ISO 8601 timestamp with an explicit
-            offset, between years 1000 and 9999. Fractional seconds are
-            accepted; precision beyond milliseconds is discarded. Must follow
-            from before normalization. Rounded up to the next day boundary in
-            the selected time zone; exact boundaries remain unchanged. No upper
-            date filter is applied when omitted. Daily filters never extend the
-            recorded coverage. Extrapolation uses the filtered daily values
-            without adding a forecast horizon. The calculated span is limited to
-            36,600 days; older devices can be queried in smaller ranges.
+            Exclusive end of the returned period as an ISO 8601 timestamp with
+            an explicit offset, between years 1000 and 9999. Fractional seconds
+            are accepted; precision beyond milliseconds is discarded. Must
+            follow from before normalization. Rounded up to the next day
+            boundary in the selected time zone; exact boundaries remain
+            unchanged. Daily values never extend the recorded coverage; without
+            an end they run to the last reading. Extrapolation forecasts daily
+            values through the day before this end, also beyond the last
+            reading; without an end it stops at the day of the last reading. The
+            calculated span is limited to 36,600 days: for daily values the
+            readings the range needs, for extrapolation the complete history
+            through this end. Daily values of older devices can therefore be
+            queried in smaller ranges, extrapolations cannot.
           schema:
             format: date-time
             nullable: true
