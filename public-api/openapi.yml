@@ -343,7 +343,11 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            $ref: '#/components/schemas/SortDirection'
+            nullable: false
+            default: desc
+            example: desc
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -514,7 +518,11 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            $ref: '#/components/schemas/SortDirection'
+            nullable: false
+            default: desc
+            example: desc
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -592,7 +600,11 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            $ref: '#/components/schemas/SortDirection'
+            nullable: false
+            default: desc
+            example: desc
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -760,7 +772,11 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            $ref: '#/components/schemas/SortDirection'
+            nullable: false
+            default: desc
+            example: desc
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -839,7 +855,11 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            $ref: '#/components/schemas/SortDirection'
+            nullable: false
+            default: desc
+            example: desc
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -1010,7 +1030,11 @@ paths:
           in: query
           description: Sort direction for results (ascending or descending by timestamp)
           schema:
-            $ref: '#/components/schemas/SortDirection'
+            nullable: false
+            default: desc
+            example: desc
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
         - name: deviceId
           required: true
           in: path
@@ -1312,7 +1336,9 @@ paths:
             Calculation method. Standard combines interval extrapolation with
             history-based forecasting.
           schema:
-            $ref: '#/components/schemas/ExtrapolationMethod'
+            example: standard
+            allOf:
+              - $ref: '#/components/schemas/ExtrapolationMethod'
         - name: interval
           required: true
           in: path
@@ -1320,7 +1346,9 @@ paths:
             Calendar interval for the extrapolation. Weeks follow firstWeekday
             and minimalDaysInFirstWeek, ISO 8601 weeks when they are omitted.
           schema:
-            $ref: '#/components/schemas/CalculationInterval'
+            example: month
+            allOf:
+              - $ref: '#/components/schemas/CalculationInterval'
         - name: from
           required: false
           in: query
