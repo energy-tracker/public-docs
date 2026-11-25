@@ -1464,7 +1464,7 @@ info:
   contact: {}
 tags: []
 servers:
-  - url: public-api.energy-tracker.best-ios-apps.de
+  - url: https://public-api.energy-tracker.app
     description: Public API Server
 components:
   securitySchemes:
